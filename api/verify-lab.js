@@ -9,7 +9,10 @@ export default async function(req,res){
     await page.setViewport({width,height:width<700?852:1150,deviceScaleFactor:1});
     await page.goto(target.href,{waitUntil:'networkidle2'});
     await page.waitForSelector('#samples .sample-button',{timeout:15000});
-    const checks=await page.evaluate(async ()=>{
+    const checks=req.body?.layout_only?await page.evaluate(()=>{
+      const boxes={};for(const id of ['hero-title','stage','heat','atlas','prinzip']){const r=document.getElementById(id).getBoundingClientRect();boxes[id]={x:r.x,y:r.y,width:r.width,height:r.height};}
+      return {checks:[{name:'Kein horizontaler Überlauf',passed:document.documentElement.scrollWidth<=innerWidth}],boxes,title:document.title,width:innerWidth};
+    }):await page.evaluate(async ()=>{
       const checks=[];const errors=[];
       window.addEventListener('error',e=>errors.push(e.message));
       const delay=ms=>new Promise(r=>setTimeout(r,ms));
@@ -58,7 +61,7 @@ export default async function(req,res){
       document.querySelectorAll('.entry-remove').forEach(b=>b.click());
       window.scrollTo(0,0);return {checks,cleanCopper,title:document.title,width:innerWidth};
     });
-    const screenshot=await page.screenshot({encoding:'base64',fullPage:false});
+    const screenshot=await page.screenshot({encoding:'base64',fullPage:!!req.body?.full_page});
     return {...checks,screenshot};
   });
   res.json(result);

@@ -85,6 +85,7 @@ function heat(){
   observed=true;refreshObservation();$('drop-hint').hidden=true;$('stage-burst').textContent=mode==='unknown'?'AHA?':mode==='mix'?'MIX!':'AHA!';$('stage-burst').classList.add('show');clearTimeout(burstTimer);burstTimer=setTimeout(()=>$('stage-burst').classList.remove('show'),1700);
   if(mode==='unknown')$('identify').disabled=false;
   updateStatus();announce('Probe erhitzt. '+$('observation-title').textContent+'.');
+  if(window.innerWidth<680)$('stage').scrollIntoView({behavior:renderer.reduceMotion?'instant':'smooth',block:'start'});
 }
 $('heat').addEventListener('click',heat);
 $('clean').addEventListener('click',()=>{model.clean();resetObservation();updateStatus();toast('Draht gereinigt. Alle Probenrückstände entfernt.');});
@@ -101,7 +102,7 @@ function updateStatus(){
   if(status!==previousStatus){$('stage-status').textContent=status;previousStatus=status;}
   $('burner').innerHTML=(model.on?'Brenner aus':'Brenner an')+' <span>⏻</span>';$('burner').setAttribute('aria-pressed',String(model.on));
   $('wire-status').innerHTML=model.dirty?'<span class="status-dot"></span> Draht mit Rückstand':'<span class="status-dot clean"></span> Draht sauber';
-  $('stage-caption').textContent=!model.on?'Brenner ausgeschaltet. Erhitzen zündet ihn wieder.':model.paused?'Pausiert. Mit ▶ geht der Versuch weiter.':model.active?'Beobachte, wie die Farbe langsam abklingt.':observed?'Nochmal erhitzen oder die Beobachtung merken.':mode==='mix'?'Zwei Proben wählen. Ihre Lichtanteile vergleichen.':mode==='unknown'?'Erhitze Probe X und stelle eine Vermutung auf.':'Probe wählen. Erhitzen. Farbe entdecken.';
+  $('stage-caption').textContent=!model.on?'Brenner ausgeschaltet. Erhitzen zündet ihn wieder.':model.paused?'Pausiert. Mit ▶ geht der Versuch weiter.':model.active&&lastRecord?lastRecord.label+' · Farbsignal klingt ab.':observed?'Nochmal erhitzen oder die Beobachtung merken.':mode==='mix'?'Zwei Proben wählen. Ihre Lichtanteile vergleichen.':mode==='unknown'?'Erhitze Probe X und stelle eine Vermutung auf.':'Probe wählen. Erhitzen. Farbe entdecken.';
 }
 // This local display timer makes no network requests; animation itself uses requestAnimationFrame.
 setInterval(()=>{if(!document.hidden)updateStatus();},500);
