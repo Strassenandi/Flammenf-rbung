@@ -14,6 +14,7 @@ export const SOURCES = [
   {title:'Royal Society of Chemistry · Qualitative Salzanalytik', url:'https://edu.rsc.org/experiments/testing-salts-for-anions-and-cations/464.article', detail:'Bariumgrün und saubere Prüfschlingen'},
   {title:'University of Illinois · Warum die Grundflamme blau wird', url:'https://van.physics.illinois.edu/ask/listing/27187', detail:'Luftzufuhr, Ruß und Moleküle in der Brennerflamme'},
   {title:'NIST · Starke Emissionslinien des Natriums', url:'https://www.physics.nist.gov/PhysRefData/Handbook/Tables/sodiumtable2.htm', detail:'589,0 / 589,6 nm; Tabellenwerte in Ångström'},
+  {title:'RSC Analyst · Molekulare Kupferemission', url:'https://pubs.rsc.org/en/content/articlehtml/1989/an/an9891401483', detail:'Emission von Kupferhalogeniden; Einfluss der chemischen Bedingungen'},
   {title:'Journal of Chemical Education · Was bei Flammenproben leuchtet', url:'https://doi.org/10.1021/acs.jchemed.5c00142', detail:'Atome, Moleküle und häufige Missverständnisse'}
 ];
 
