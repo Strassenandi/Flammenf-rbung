@@ -1,0 +1,65 @@
+import { browser } from 'hatchable';
+export const access = 'admin';
+export const methods = ['POST'];
+export default async function(req,res){
+  const target=new URL(req.body?.url||'https://flammenlabor.hatchable.site');
+  if(target.origin!=='https://flammenlabor.hatchable.site')return res.status(400).json({error:'Only this lab can be tested.'});
+  const width=[360,393,768,1024,1440].includes(req.body?.width)?req.body.width:1440;
+  const result=await browser.session(async page=>{
+    await page.setViewport({width,height:width<700?852:1150,deviceScaleFactor:1});
+    await page.goto(target.href,{waitUntil:'networkidle2'});
+    await page.waitForSelector('#samples .sample-button',{timeout:15000});
+    const checks=await page.evaluate(async ()=>{
+      const checks=[];const errors=[];
+      window.addEventListener('error',e=>errors.push(e.message));
+      const delay=ms=>new Promise(r=>setTimeout(r,ms));
+      const q=id=>document.getElementById(id);
+      const click=selector=>document.querySelector(selector).click();
+      const test=(name,passed,detail)=>checks.push({name,passed:!!passed,detail:detail||''});
+      const setInput=(id,value)=>{q(id).value=value;q(id).dispatchEvent(new Event('input',{bubbles:true}));};
+      const toggle=(id,value)=>{q(id).checked=value;q(id).dispatchEvent(new Event('change',{bubbles:true}));};
+      test('Sieben auswählbare Proben',document.querySelectorAll('.sample-button').length===7);
+      test('Kein horizontaler Überlauf',document.documentElement.scrollWidth<=innerWidth,document.documentElement.scrollWidth+' / '+innerWidth);
+      click('#clean');click('[data-id="cu"]');click('#heat');await delay(600);
+      test('Kupfer: Blaugrün',q('observation-title').textContent==='Blaugrün',q('observation-title').textContent);
+      test('Draht erhält Rückstand',q('wire-status').textContent.includes('Rückstand'));
+      const cleanCopper=q('observation-swatch').style.backgroundColor;
+      click('#save');test('Laborbuch speichert',Number(q('notebook-count').textContent)>=1);
+      click('#clean');test('Reinigung löscht Rückstände',q('wire-status').textContent.includes('sauber'));
+      click('[data-id="k"]');toggle('sodium',true);click('#heat');await delay(450);
+      test('Natrium maskiert Kalium',q('observation-title').textContent.includes('Natriumgelb'));
+      toggle('cobalt',true);test('Kobaltglas einblendbar',!q('filter-frame').hidden);
+      test('Filter dämpft Natriumhinweis',!q('observation-title').textContent.includes('Natriumgelb'));
+      toggle('cobalt',false);toggle('sodium',false);click('#clean');
+      setInput('air',0);click('#heat');await delay(450);
+      test('Geschlossene Luftzufuhr: gelbe Grundflamme',q('observation-title').textContent.includes('Gelbe Grundflamme'));
+      setInput('air',85);click('#clean');
+      click('[data-mode="mix"]');click('[data-id="na"]');
+      test('Mischmodus: zwei Proben',document.querySelectorAll('.sample-button.selected').length===2);
+      click('[data-id="ba"]');test('Auswahl auf zwei begrenzt',document.querySelectorAll('.sample-button.selected').length===2);
+      click('#heat');await delay(400);test('Natrium dominiert die Mischung',q('observation-title').textContent==='Natriumgelb dominiert');
+      click('[data-mode="unknown"]');
+      test('Probe X verbirgt Probenetikett',q('selected-name').textContent==='Probe X'&&q('samples').hidden);
+      test('Vermutung braucht vorherigen Versuch',q('identify').disabled);
+      click('#heat');await delay(500);
+      test('Vermutung nach Versuch möglich',!q('identify').disabled);
+      const matching={'Intensiv gelb':'na','Zart lila':'k','Orange bis ziegelrot':'ca','Apfelgrün':'ba','Blaugrün':'cu'}[q('observation-title').textContent];
+      test('Probe X liefert einen Referenzbefund',!!matching,q('observation-title').textContent);
+      if(matching){q('guess').value=matching;click('#identify');test('Richtiger Referenzvergleich erkannt',q('challenge-feedback').textContent.includes('richtig im Modell'));}
+      click('[data-mode="single"]');click('#clean');click('[data-id="cu"]');
+      setInput('amount',3);click('#heat');await delay(550);
+      click('#pause');await delay(550);test('Pausieren',q('stage-status').textContent.includes('pausiert'));
+      click('#pause');click('#burner');await delay(550);
+      test('Brenner ausschalten',q('stage-status').textContent.includes('ausgeschaltet'));
+      click('#heat');await delay(550);
+      test('Erhitzen startet ausgeschalteten Brenner',q('stage-status').textContent.includes('Probe in der Flamme'));
+      test('Keine JS-Laufzeitfehler',errors.length===0,errors.join('; '));
+      test('Kein Überlauf nach Interaktionen',document.documentElement.scrollWidth<=innerWidth);
+      document.querySelectorAll('.entry-remove').forEach(b=>b.click());
+      window.scrollTo(0,0);return {checks,cleanCopper,title:document.title,width:innerWidth};
+    });
+    const screenshot=await page.screenshot({encoding:'base64',fullPage:false});
+    return {...checks,screenshot};
+  });
+  res.json(result);
+}
