@@ -2,6 +2,7 @@ import {SAMPLES,SOURCES,byId} from './data.js';
 import {FlameModel,cssColor} from './model.js';
 import {FlameRenderer} from './render.js';
 import {Journal} from './journal.js';
+import {describeObservation} from './observation.js';
 
 const $=id=>document.getElementById(id),model=new FlameModel();
 let mode='single',selected=['cu'],unknownId=null,unknownSolved=false,observed=false,lastRecord=null,toastTimer,burstTimer;
@@ -53,27 +54,13 @@ $('new-unknown').addEventListener('click',()=>{newUnknown();toast('Eine neue, sa
 
 function peakView(){const time=model.elapsed;model.elapsed=.6;const view=model.view();model.elapsed=time;return view;}
 function describe(v){
-  const tested=ids();const parts=v.components;const dominant=[...parts].sort((a,b)=>b.weight-a.weight)[0];const hasNa=tested.includes('na');
-  if(model.air<30)return {label:'Gelbe Grundflamme überlagert',text:'Bei wenig Luft leuchten Rußteilchen gelb. Das erschwert die Flammenprobe. Öffne die Luftzufuhr und vergleiche noch einmal.'};
-  if(v.na>.62&&!hasNa)return {label:'Natriumgelb überlagert',text:'Die Natriumspur überstrahlt hier die schwächere Probenfarbe. Reinige den Draht, schalte die Natriumspur aus oder vergleiche die Ansicht durch Kobaltglas.'};
-  if(mode==='mix'){
-    const sodiumMix=tested.includes('na')&&tested.length>1;
-    return {label:sodiumMix&&!model.cobalt?'Natriumgelb dominiert':tested.length>1?'Überlagerte Flammenfarben':byId(tested[0]).label,text:sodiumMix&&!model.cobalt?'Das starke Natriumsignal dominiert diese Mischung. Flammenfarben überlagern sich als Licht; die Darstellung ist qualitativ angenähert.':'Die Lichtanteile der Proben überlagern sich. Eine Mischfarbe ist kein eindeutiger Nachweis ihrer Bestandteile.'};
-  }
-  const probe=byId(tested[0]);
-  const label=model.cobalt?'Gedämpft durch Kobaltglas':dominant&&dominant.id!==probe.id?'Überlagerte Farbsignale':probe.label;
-  let text=mode==='unknown'?'Beobachte die Färbung und vergleiche mit dem Farbatlas. Das ist ein Hinweis auf eine der fünf Modellproben.':probe.note;
-  if(model.cobalt)text=probe.id==='na'?'Kobaltglas unterdrückt hier das Natriumgelb deutlich. Auch andere Farben werden gedämpft. Die Filterwirkung ist schematisch dargestellt.':probe.id==='k'?'Das Kobaltglas schwächt Natriumgelb stärker als das Kaliumsignal. Die lila Färbung kann dadurch besser erkennbar werden. Die Modellansicht verändert auch die Farbwahrnehmung.':'Kobaltglas verändert den Farbeindruck und schwächt auch Teile dieses Signals. Vergleiche zusätzlich die ungefilterte Flamme.';
-  if(mode==='unknown'&&model.cobalt)text='Der Filter dämpft Gelb besonders stark und verändert auch andere Farben. Vergleiche für deine Vermutung die ungefilterte Ansicht.';
-  if(v.na>.18&&v.na<=.62&&!hasNa&&!model.cobalt)text+=' Ein gelber Natriumanteil stört die Beobachtung.';
-  if(model.air>=30&&model.air<65)text+=' Mehr Luft macht das Farbsignal besser sichtbar.';
-  return {label,text};
+  return describeObservation(v,{tested:ids(),mode,air:model.air});
 }
 function refreshObservation(){
   if(!observed||!model.current)return;
   const view=peakView(),description=describe(view),color=cssColor(view.observed);
   $('observation-title').textContent=description.label;$('observation-text').textContent=description.text;$('observation-swatch').style.background=color;
-  const settings='Menge: '+amountNames[model.loadedAmount]+' · Luft: '+model.air+' % · '+(model.dirtyBefore?'Draht mit Rückstand':'Draht sauber')+' · Natriumspur: '+(model.sodium?'an':'aus')+' · Kobaltglas: '+(model.cobalt?'an':'aus');
+  const settings='Anfangsbeobachtung · Menge: '+amountNames[model.loadedAmount]+' · Luft: '+model.air+' % · '+(model.dirtyBefore?'Draht mit Rückstand':'Draht sauber')+' · Natriumspur: '+(model.sodium?'an':'aus')+' · Kobaltglas: '+(model.cobalt?'an':'aus');
   lastRecord={title:title(),label:description.label,color,settings};$('save').disabled=false;
   $('flame-canvas').setAttribute('aria-label',title()+': '+description.label+'. '+description.text);
 }
@@ -91,7 +78,7 @@ $('heat').addEventListener('click',heat);
 $('clean').addEventListener('click',()=>{model.clean();resetObservation();updateStatus();toast('Draht gereinigt. Alle Probenrückstände entfernt.');});
 $('amount').addEventListener('input',()=>{model.amount=Number($('amount').value);$('amount-value').textContent=amountNames[model.amount];});
 $('air').addEventListener('input',()=>{model.air=Number($('air').value);$('air-value').textContent=model.air<30?'Geschlossen':model.air<65?'Teilweise offen':'Offen';$('air-note').textContent=model.air<30?'Gelbes Rußleuchten kann die Probenfarbe verdecken.':model.air<65?'Die Grundflamme wird blauer. Mehr Luft verbessert den Kontrast.':'Die blaue Grundflamme macht Farben gut sichtbar.';if(model.active)refreshObservation();updateStatus();});
-$('cobalt').addEventListener('change',()=>{model.cobalt=$('cobalt').checked;$('filter-frame').hidden=!model.cobalt;if(model.active)refreshObservation();toast(model.cobalt?'Kobaltglas an: schematische Filteransicht.':'Ungefilterte Flamme.');});
+$('cobalt').addEventListener('change',()=>{model.cobalt=$('cobalt').checked;$('filter-frame').hidden=!model.cobalt;if(model.active)refreshObservation();toast(model.cobalt?'Blick durch Kobaltglas: weniger Natriumgelb, weniger Licht.':'Blick ohne Kobaltglas.');});
 $('sodium').addEventListener('change',()=>{model.sodium=$('sodium').checked;if(model.active)refreshObservation();toast(model.sodium?'Natriumspur eingeschaltet. Sie wirkt beim Erhitzen.':'Zusätzliche Natriumspur ausgeschaltet.');});
 $('burner').addEventListener('click',()=>{model.on=!model.on;if(!model.on)model.withdraw();updateStatus();announce(model.on?'Brenner eingeschaltet.':'Brenner ausgeschaltet.');});
 $('pause').addEventListener('click',()=>{model.paused=!model.paused;$('pause').textContent=model.paused?'▶':'Ⅱ';$('pause').setAttribute('aria-label',model.paused?'Simulation fortsetzen':'Simulation pausieren');$('pause').title=model.paused?'Simulation fortsetzen':'Simulation pausieren';updateStatus();});

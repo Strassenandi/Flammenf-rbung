@@ -36,7 +36,7 @@ for (const basePath of ['/', '/Flammenf-rbung/']) {
     const response = await fetch(url);
     assert.equal(response.status, 200);
     const html = await response.text();
-    const files = new Set(['data.js', 'model.js', 'render.js', 'journal.js']);
+    const files = new Set(['data.js', 'model.js', 'render.js', 'journal.js', 'observation.js']);
     for (const [, asset] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
       if (asset.startsWith('#')) continue;
       assert(asset.startsWith('./'));

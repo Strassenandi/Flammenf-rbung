@@ -22,13 +22,13 @@ export class FlameRenderer{
     // Flat ink hatching and the burner are drawn separately from the light.
     if(v.on){
       const glow=c.createRadialGradient(cx,top-height*.4,5,cx,top-height*.4,height*.9);
-      glow.addColorStop(0,cssColor(v.observed).replace('rgb(','rgba(').replace(')',','+(v.cobalt?.06:.14)+')'));glow.addColorStop(1,'rgba(30,50,35,0)');
+      glow.addColorStop(0,cssColor(v.observedHue).replace('rgb(','rgba(').replace(')',','+(.14*v.totalTransmission)+')'));glow.addColorStop(1,'rgba(30,50,35,0)');
       c.fillStyle=glow;c.fillRect(cx-height,top-height*1.3,height*2,height*1.6);
-      const layers=[{height:height,width:width,color:v.base,alpha:.12},{height:height*.95,width:width*.83,color:v.base,alpha:.38}];
-      if(v.active)layers.push({height:height*(.93+Math.sin(t*3)*.03),width:width*.9,color:v.signal,alpha:clamp(v.signalWeight/(v.signalWeight+v.baseWeight),0,.85)*.85});
-      for(const [i,l] of layers.entries()){c.globalAlpha=v.cobalt?l.alpha*.7:l.alpha;const grad=c.createLinearGradient(cx,top-l.height,cx,top);grad.addColorStop(0,cssColor(l.color));grad.addColorStop(.45,cssColor(l.color));grad.addColorStop(1,cssColor(v.base));c.fillStyle=grad;this.plume(cx,top,l.height,l.width,t+i*.47);c.fill();}
-      c.globalAlpha=.46;this.plume(cx,top,height*.65,width*.50,t+.8);c.fillStyle=cssColor(v.observed);c.fill();
-      c.globalAlpha=.75;this.plume(cx,top,height*.38,width*.34,t*.8);const core=c.createLinearGradient(0,top-height*.4,0,top);core.addColorStop(0,'#80c8ff');core.addColorStop(.6,'#3f83ca');core.addColorStop(1,'#356998');c.fillStyle=core;c.fill();
+      const layers=[{height:height,width:width,color:v.base,alpha:.12*v.baseTransmission},{height:height*.95,width:width*.83,color:v.base,alpha:.38*v.baseTransmission}];
+      if(v.active)layers.push({height:height*(.93+Math.sin(t*3)*.03),width:width*.9,color:v.signal,alpha:clamp(v.unfilteredSignalWeight/(v.unfilteredSignalWeight+v.unfilteredBaseWeight),0,.85)*.85*v.signalTransmission});
+      for(const [i,l] of layers.entries()){c.globalAlpha=l.alpha;const grad=c.createLinearGradient(cx,top-l.height,cx,top);grad.addColorStop(0,cssColor(l.color));grad.addColorStop(.45,cssColor(l.color));grad.addColorStop(1,cssColor(v.base));c.fillStyle=grad;this.plume(cx,top,l.height,l.width,t+i*.47);c.fill();}
+      c.globalAlpha=.46*v.totalTransmission;this.plume(cx,top,height*.65,width*.50,t+.8);c.fillStyle=cssColor(v.observedHue);c.fill();
+      c.globalAlpha=.75*v.baseTransmission;this.plume(cx,top,height*.38,width*.34,t*.8);const core=c.createLinearGradient(0,top-height*.4,0,top);core.addColorStop(0,'#80c8ff');core.addColorStop(.6,'#3f83ca');core.addColorStop(1,'#356998');c.fillStyle=core;c.fill();
       c.globalAlpha=.8;c.beginPath();c.moveTo(cx-9*scale,top);c.quadraticCurveTo(cx-5*scale,top-height*.22,cx+2*scale,top-height*.34);c.quadraticCurveTo(cx+10*scale,top-height*.16,cx+8*scale,top);c.fillStyle='#192925';c.fill();
       c.globalAlpha=1;
     }

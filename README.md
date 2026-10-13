@@ -6,6 +6,8 @@ Ein interaktives Chemielabor im modernen Comic-Stil, übernommen aus dem [Hatcha
 
 Das Labor läuft vollständig im Browser: sieben Metallsalzproben, animierter Bunsenbrenner, einstellbare Luftzufuhr und Probenmenge, Mischmodus, unbekannte Probe X, Natriumverunreinigung, Drahtreinigung und Kobaltglas. Beobachtungen lassen sich im lokalen Laborbuch merken und als CSV exportieren. Der Farbatlas und die wissenschaftlichen Quellen erklären die Grenzen der qualitativen Lernsimulation.
 
+Kobaltglas dämpft vorhandene Lichtanteile und verdunkelt die Ansicht. Kalium wird bei Natriumüberlagerung besser erkennbar, ohne dass ein zusätzliches blaues Signal entsteht. Die fachlichen Quellen und Grenzen des Modells stehen im [Rechercheabgleich](docs/flame-test-research.md).
+
 ## Lokal starten
 
 Voraussetzung: Node.js 22 oder neuer; empfohlen ist Node.js 24. Es gibt keine npm-Abhängigkeiten und keinen Installationsschritt.
