@@ -36,20 +36,21 @@ Für statisches Hosting reicht der Inhalt von `dist/`. Die Website benötigt kei
 
 ## GitHub Pages
 
-Der Workflow **Flammenlabor prüfen und veröffentlichen** läuft bei Pushes auf `main`, bei Pull Requests und auf Wunsch manuell. Er veröffentlicht ausschließlich erfolgreich geprüfte Änderungen auf `main`.
-
-Die erstmalige Aktivierung erfolgt unter [Settings → Pages](https://github.com/Strassenandi/Flammenf-rbung/settings/pages): Unter **Build and deployment → Source** wähle **GitHub Actions**. Starte danach den Workflow über **Actions → Flammenlabor prüfen und veröffentlichen → Run workflow** erneut. Wenn Pages bereits so eingerichtet ist, erfolgt die Veröffentlichung automatisch.
-
-Solange Pages nicht für GitHub Actions eingerichtet ist, laufen die Prüfungen trotzdem. Der Workflow zeigt dann einen Hinweis in seiner Zusammenfassung und überspringt die Veröffentlichung. Es ist kein persönlicher Zugriffstoken nötig.
-
-Die vorgesehene Adresse nach erfolgreicher Veröffentlichung ist:
+GitHub Pages ist für dieses Repository bereits mit **Deploy from a branch → main → / (root)** eingerichtet. Der Einstieg `index.html` öffnet die Anwendung unter `public/`; `.nojekyll` sorgt für die direkte Auslieferung der statischen Dateien. Pushes auf `main` werden über GitHubs vorhandenen Pages-Workflow veröffentlicht.
 
 **https://strassenandi.github.io/Flammenf-rbung/**
+
+Der zusätzliche Workflow **Flammenlabor prüfen und veröffentlichen** prüft Pushes auf `main`, Pull Requests und manuelle Starts. Bei der vorhandenen Veröffentlichung aus einem Branch führt er die Prüfungen aus und überspringt eine doppelte Veröffentlichung. Der vorhandene Pages-Workflow wartet dabei nicht auf die Tests.
+
+Optional kannst du die Veröffentlichung an erfolgreiche Prüfungen koppeln: Wähle unter [Settings → Pages](https://github.com/Strassenandi/Flammenf-rbung/settings/pages) bei **Build and deployment → Source** den Eintrag **GitHub Actions**. Starte danach **Actions → Flammenlabor prüfen und veröffentlichen → Run workflow**. In diesem Modus veröffentlicht der zusätzliche Workflow ausschließlich erfolgreich geprüfte Änderungen auf `main` und liefert den Inhalt von `dist/` direkt an der Hauptadresse aus.
+
+Für ein neu geklontes Repository ist diese erstmalige Pages-Einrichtung nötig. Es ist kein persönlicher Zugriffstoken erforderlich.
 
 ## Projektstruktur
 
 | Pfad | Inhalt |
 | --- | --- |
+| `index.html`, `.nojekyll` | Einstieg für die vorhandene Pages-Veröffentlichung aus dem Repository-Root |
 | `public/index.html`, `public/style.css` | Oberfläche, Comic-Gestaltung und responsive Layouts |
 | `public/app.js` | Auswahl, Versuchsmodi und Bedienung |
 | `public/data.js` | Salzproben, Referenzfarben und Quellen |

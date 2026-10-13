@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f2e9">
+  <meta name="description" content="Dein virtuelles Labor für Flammenfärbung im modernen Comic-Stil.">
+  <meta http-equiv="refresh" content="0;url=./public/">
+  <title>Flammenlabor</title>
+  <link rel="icon" href="./public/favicon.svg" type="image/svg+xml">
+  <script>
+    const destination = new URL('./public/', location.href);
+    destination.search = location.search;
+    destination.hash = location.hash;
+    location.replace(destination.href);
+  </script>
+</head>
+<body>
+  <p>Das Flammenlabor wird geöffnet. <a href="./public/">Zum Experiment</a></p>
+</body>
+</html>

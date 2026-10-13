@@ -11,7 +11,11 @@ const pages = response.ok ? await response.json() : null;
 const enabled = pages?.build_type === 'workflow';
 await appendFile(GITHUB_OUTPUT, `enabled=${enabled}\n`);
 
-if (!enabled) {
+if (pages?.build_type === 'legacy' && pages.source?.branch === 'main' && pages.source?.path === '/') {
+  const message = 'GitHub Pages veröffentlicht bereits aus main / (root). Der Einstieg öffnet public/; die zusätzliche Veröffentlichung dieses Workflows wird übersprungen.';
+  console.log(`::notice title=Bestehende Pages-Veröffentlichung::${message}`);
+  await appendFile(GITHUB_STEP_SUMMARY, `### Flammenlabor ist geprüft\n\n${message}\n\n[Flammenlabor öffnen](${pages.html_url})\n`);
+} else if (!enabled) {
   const settings = `${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/settings/pages`;
   const message = 'Die Projektprüfung war erfolgreich. Für die Veröffentlichung bitte unter Settings → Pages → Source „GitHub Actions“ auswählen und diesen Workflow erneut starten.';
   console.log(`::notice title=GitHub Pages aktivieren::${message}`);

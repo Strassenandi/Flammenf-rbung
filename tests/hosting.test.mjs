@@ -1,7 +1,25 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { once } from 'node:events';
+import { readFile } from 'node:fs/promises';
+import { runInNewContext } from 'node:vm';
 import { createStaticServer } from '../scripts/serve.mjs';
+
+test('Der Pages-Einstieg öffnet das Labor und erhält Parameter sowie Abschnittslinks', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /content="0;url=\.\/public\/"/);
+  await readFile(new URL('../.nojekyll', import.meta.url));
+  const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+  for (const suffix of ['', '#atlas', '?probe=cu#experiment']) {
+    const original = new URL('https://strassenandi.github.io/Flammenf-rbung/' + suffix);
+    let redirected;
+    runInNewContext(script, { URL, location: {
+      href: original.href, search: original.search, hash: original.hash,
+      replace(url) { redirected = url; }
+    } });
+    assert.equal(redirected, 'https://strassenandi.github.io/Flammenf-rbung/public/' + suffix);
+  }
+});
 
 async function start(t, basePath = '/') {
   const server = createStaticServer({ basePath });
