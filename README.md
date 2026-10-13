@@ -2,7 +2,7 @@
 
 [![Deploy to Hatchable](https://hatchable.com/deploy-button.svg)](https://hatchable.com/deploy?repo=https://github.com/Strassenandi/Flammenf-rbung)
 
-Neugier brennt bunt. Dein virtuelles Labor für Flammenfarben.
+Neugier brennt bunt. Dein virtuelles Labor für Flammenfärbung.
 
 This folder is a complete Hatchable project. Everything the app needs is in these files: pages, API routes, database migrations, seed data, and the hatchable.toml manifest that declares the services and keys it uses.
 
